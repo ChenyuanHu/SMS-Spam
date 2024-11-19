@@ -64,22 +64,6 @@ print(f"Spam samples: {spam_count}")
 print(f"Ham samples: {ham_count}")
 
 
-def augment_negative_samples(dataset, augment_factor=2):
-    spam_samples = [data for data in dataset if data[1] == 1]  # 获取所有 spam 样本
-    augmented_spam_samples = spam_samples * augment_factor  # 扩充负样本
-    return ConcatDataset([dataset, augmented_spam_samples])  # 合并原始数据集和扩充的负样本
-
-# 扩充数据集
-train_dataset = augment_negative_samples(train_dataset, augment_factor=4)
-
-# 重新统计样本数
-spam_count, ham_count = count_samples(train_dataset)
-print(f"After augmentation:")
-print(f"Total samples: {len(train_dataset)}")
-print(f"Spam samples: {spam_count}")
-print(f"Ham samples: {ham_count}")
-
-
 train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
 
@@ -311,7 +295,7 @@ optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
 model.to(device)
 
-num_epochs = 100
+num_epochs = 10
 for epoch in range(num_epochs):
     model.train()
     t0 = time.time()
