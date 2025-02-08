@@ -8,6 +8,11 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader, random_split, ConcatDataset
 import tiktoken
 
+# 设置随机种子以确保可重复性
+torch.manual_seed(42)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(42)
+
 
 class SMSSpamDataset(Dataset):
 
@@ -175,9 +180,7 @@ class MyModule(nn.Module):
             l_f = nn.Linear(config.n_embd, 2),
         ))
         self.config = config
-        # init all weights, use a torch rng object to be very careful
-        self.init_rng = torch.Generator()
-        self.init_rng.manual_seed(42)
+        # init all weights
         self.apply(self._init_weights)
 
     def _init_weights(self, module):
@@ -187,11 +190,11 @@ class MyModule(nn.Module):
             # we want to skip initializing lm_head, which shares parameters with wte
             # and wte was already initialized down below during the Embedding init
             if not hasattr(module, 'LLMC_SKIP_INIT'):
-                torch.nn.init.normal_(module.weight, mean=0.0, std=std, generator=self.init_rng)
+                torch.nn.init.normal_(module.weight, mean=0.0, std=std)
             if module.bias is not None:
                 torch.nn.init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
-            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02, generator=self.init_rng)
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     def forward(self, idx, targets=None):
         device = idx.device
